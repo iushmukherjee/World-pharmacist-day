@@ -74,7 +74,7 @@
   <div class="reveal-card">
     <h1>🎉 Happy World Pharmacist Day!</h1>
     
-    <canvas id="posterCanvas" width="750" height="1050"></canvas>
+    <canvas id="posterCanvas" width="750" height="1080"></canvas>
 
     <div class="btn-group">
       <button class="btn-primary" id="downloadBtn">Download Frame</button>
@@ -95,7 +95,9 @@
       window.location.href = 'index.html';
     }
 
-    // Alignment setup for the image poster
+    canvas.width = 750;
+    canvas.height = 1080;
+
     const CIRCLE_CENTER_X = 375;
     const CIRCLE_CENTER_Y = 512;
     const CIRCLE_RADIUS = 222;
@@ -121,6 +123,10 @@
     function renderCanvas() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+      // Fill background for extra bottom canvas space
+      ctx.fillStyle = '#0b1d3a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
       // 1. Draw Cropped Photo inside Circle
       ctx.save();
       ctx.beginPath();
@@ -136,26 +142,21 @@
       );
       ctx.restore();
 
-      // 2. Draw Frame Overlay
-      ctx.drawImage(frameImage, 0, 0, canvas.width, canvas.height);
+      // 2. Draw Poster Overlay
+      ctx.drawImage(frameImage, 0, 0, 750, 1050);
 
-      // 3. Render White Text (Adjusted Y Positions & Shadows for Visibility)
+      // 3. Render White Text cleanly below Alteus logo
       ctx.textAlign = 'center';
       ctx.fillStyle = '#FFFFFF';
+      ctx.shadowColor = 'transparent';
 
-      // Text Shadow to make it stand out clearly
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
-      ctx.shadowBlur = 6;
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 2;
-
-      // Pharmacist Name (placed directly below "Thank you for your dedication and care.")
-      ctx.font = 'bold 30px "Segoe UI", Arial, sans-serif';
-      ctx.fillText(pharmacistName, CIRCLE_CENTER_X, 915);
+      // Pharmacist Name
+      ctx.font = 'bold 24px "Segoe UI", Arial, sans-serif';
+      ctx.fillText(pharmacistName, CIRCLE_CENTER_X, 1015);
 
       // Pharmacy Name
-      ctx.font = '500 22px "Segoe UI", Arial, sans-serif';
-      ctx.fillText(pharmacyName, CIRCLE_CENTER_X, 950);
+      ctx.font = '18px "Segoe UI", Arial, sans-serif';
+      ctx.fillText(pharmacyName, CIRCLE_CENTER_X, 1045);
     }
 
     function triggerSurpriseConfetti() {
