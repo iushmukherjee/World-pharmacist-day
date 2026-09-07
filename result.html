@@ -95,7 +95,6 @@
       window.location.href = 'index.html';
     }
 
-    // Restored standard poster aspect ratio
     canvas.width = 750;
     canvas.height = 1050;
 
@@ -142,23 +141,22 @@
       // 2. Draw Poster Overlay
       ctx.drawImage(frameImage, 0, 0, canvas.width, canvas.height);
 
-      // 3. Render White Text BETWEEN CIRCLE FRAME AND "THANK YOU..."
+      // 3. Render White Text (Shifted downwards)
       ctx.textAlign = 'center';
       ctx.fillStyle = '#FFFFFF';
 
-      // Slight shadow to ensure crisp reading against blue pattern background
       ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
       ctx.shadowBlur = 4;
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 1;
 
-      // Pharmacist Name (Just below the circle frame)
+      // Pharmacist Name (Shifted down to Y = 785)
       ctx.font = 'bold 24px "Segoe UI", Arial, sans-serif';
-      ctx.fillText(pharmacistName, CIRCLE_CENTER_X, 765);
+      ctx.fillText(pharmacistName, CIRCLE_CENTER_X, 785);
 
-      // Pharmacy Name (Directly below Pharmacist Name)
+      // Pharmacy Name (Shifted down to Y = 812)
       ctx.font = '18px "Segoe UI", Arial, sans-serif';
-      ctx.fillText(pharmacyName, CIRCLE_CENTER_X, 795);
+      ctx.fillText(pharmacyName, CIRCLE_CENTER_X, 812);
     }
 
     function triggerSurpriseConfetti() {
