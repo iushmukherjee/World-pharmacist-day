@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Your Frame | Alteus</title>
   
-  <!-- Canvas Confetti Library for Surprise Effect -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <style>
@@ -88,17 +87,15 @@
     const canvas = document.getElementById('posterCanvas');
     const ctx = canvas.getContext('2d');
 
-    // Retrieve data passed from index.html
     const pharmacistName = sessionStorage.getItem('pharmacistName');
     const pharmacyName = sessionStorage.getItem('pharmacyName');
     const croppedImageSrc = sessionStorage.getItem('croppedImage');
 
-    // Redirect back to main page if user accesses result page directly without submitting
     if (!pharmacistName || !croppedImageSrc) {
       window.location.href = 'index.html';
     }
 
-    // Circular frame parameters matching frame.png dimensions
+    // Alignment setup for the image poster
     const CIRCLE_CENTER_X = 375;
     const CIRCLE_CENTER_Y = 512;
     const CIRCLE_RADIUS = 222;
@@ -124,7 +121,7 @@
     function renderCanvas() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // 1. Draw Cropped Photo inside Circle Mask
+      // 1. Draw Cropped Photo inside Circle
       ctx.save();
       ctx.beginPath();
       ctx.arc(CIRCLE_CENTER_X, CIRCLE_CENTER_Y, CIRCLE_RADIUS, 0, Math.PI * 2, true);
@@ -139,23 +136,28 @@
       );
       ctx.restore();
 
-      // 2. Overlay Frame Template
+      // 2. Draw Frame Overlay
       ctx.drawImage(frameImage, 0, 0, canvas.width, canvas.height);
 
-      // 3. Render White Text below Alteus logo
+      // 3. Render White Text (Adjusted Y Positions & Shadows for Visibility)
       ctx.textAlign = 'center';
       ctx.fillStyle = '#FFFFFF';
 
-      // Pharmacist Name
-      ctx.font = 'bold 26px sans-serif';
-      ctx.fillText(pharmacistName, CIRCLE_CENTER_X, 1000);
+      // Text Shadow to make it stand out clearly
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+      ctx.shadowBlur = 6;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 2;
+
+      // Pharmacist Name (placed directly below "Thank you for your dedication and care.")
+      ctx.font = 'bold 30px "Segoe UI", Arial, sans-serif';
+      ctx.fillText(pharmacistName, CIRCLE_CENTER_X, 915);
 
       // Pharmacy Name
-      ctx.font = '20px sans-serif';
-      ctx.fillText(pharmacyName, CIRCLE_CENTER_X, 1030);
+      ctx.font = '500 22px "Segoe UI", Arial, sans-serif';
+      ctx.fillText(pharmacyName, CIRCLE_CENTER_X, 950);
     }
 
-    // Trigger surprise confetti burst
     function triggerSurpriseConfetti() {
       confetti({
         particleCount: 100,
@@ -164,7 +166,6 @@
       });
     }
 
-    // Download Button handler
     document.getElementById('downloadBtn').addEventListener('click', () => {
       const link = document.createElement('a');
       link.download = `Pharmacist_Day_${pharmacistName.replace(/\s+/g, '_')}.png`;
@@ -172,12 +173,10 @@
       link.click();
     });
 
-    // Share to WhatsApp Handler
     document.getElementById('shareWhatsappBtn').addEventListener('click', () => {
       canvas.toBlob(async (blob) => {
         const file = new File([blob], 'pharmacist_day.png', { type: 'image/png' });
 
-        // Native mobile share API (shares image directly if supported)
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
           try {
             await navigator.share({
@@ -189,7 +188,6 @@
             console.log('Share canceled', err);
           }
         } else {
-          // Desktop fallback: download image & open WhatsApp web
           const downloadLink = document.createElement('a');
           downloadLink.download = 'pharmacist_day.png';
           downloadLink.href = canvas.toDataURL('image/png');
@@ -203,4 +201,3 @@
   </script>
 </body>
 </html>
-
