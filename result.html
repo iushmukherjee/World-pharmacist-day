@@ -74,7 +74,7 @@
   <div class="reveal-card">
     <h1>🎉 Happy World Pharmacist Day!</h1>
     
-    <canvas id="posterCanvas" width="750" height="1080"></canvas>
+    <canvas id="posterCanvas" width="750" height="1050"></canvas>
 
     <div class="btn-group">
       <button class="btn-primary" id="downloadBtn">Download Frame</button>
@@ -95,8 +95,9 @@
       window.location.href = 'index.html';
     }
 
+    // Restored standard poster aspect ratio
     canvas.width = 750;
-    canvas.height = 1080;
+    canvas.height = 1050;
 
     const CIRCLE_CENTER_X = 375;
     const CIRCLE_CENTER_Y = 512;
@@ -123,10 +124,6 @@
     function renderCanvas() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Fill background for extra bottom canvas space
-      ctx.fillStyle = '#0b1d3a';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
       // 1. Draw Cropped Photo inside Circle
       ctx.save();
       ctx.beginPath();
@@ -143,20 +140,25 @@
       ctx.restore();
 
       // 2. Draw Poster Overlay
-      ctx.drawImage(frameImage, 0, 0, 750, 1050);
+      ctx.drawImage(frameImage, 0, 0, canvas.width, canvas.height);
 
-      // 3. Render White Text cleanly below Alteus logo
+      // 3. Render White Text BETWEEN CIRCLE FRAME AND "THANK YOU..."
       ctx.textAlign = 'center';
       ctx.fillStyle = '#FFFFFF';
-      ctx.shadowColor = 'transparent';
 
-      // Pharmacist Name
+      // Slight shadow to ensure crisp reading against blue pattern background
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+      ctx.shadowBlur = 4;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 1;
+
+      // Pharmacist Name (Just below the circle frame)
       ctx.font = 'bold 24px "Segoe UI", Arial, sans-serif';
-      ctx.fillText(pharmacistName, CIRCLE_CENTER_X, 1015);
+      ctx.fillText(pharmacistName, CIRCLE_CENTER_X, 765);
 
-      // Pharmacy Name
+      // Pharmacy Name (Directly below Pharmacist Name)
       ctx.font = '18px "Segoe UI", Arial, sans-serif';
-      ctx.fillText(pharmacyName, CIRCLE_CENTER_X, 1045);
+      ctx.fillText(pharmacyName, CIRCLE_CENTER_X, 795);
     }
 
     function triggerSurpriseConfetti() {
