@@ -61,7 +61,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script>
   let cropper = null;
-  const rawFrameLink = "https://i.ibb.co/jvT93y9b/Celebrating-the-Essential-Guardians-of-Health-1.png";
+  // Local repo file reference
+  const frameUrl = "./pharmacist-day.png";
 
   function initCropper(event) {
     const file = event.target.files[0];
@@ -96,7 +97,7 @@
     reader.readAsDataURL(file);
   }
 
-  async function generatePoster() {
+  function generatePoster() {
     const name = document.getElementById('userName').value.trim();
     const pharmacy = document.getElementById('pharmacyName').value.trim();
     const canvas = document.getElementById('posterCanvas');
@@ -109,64 +110,52 @@
       return;
     }
 
-    generateBtn.innerText = "Loading Frame & Generating...";
+    generateBtn.innerText = "Generating...";
     generateBtn.disabled = true;
 
-    try {
-      // 1. Fetch external image link as Blob to prevent Canvas CORS contamination
-      const proxyUrl = "https://corsproxy.io/?" + encodeURIComponent(rawFrameLink);
-      const response = await fetch(proxyUrl);
-      
-      if (!response.ok) throw new Error("Network response was not ok");
+    const croppedCanvas = cropper.getCroppedCanvas({
+      width: 1080,
+      height: 1080
+    });
 
-      const blob = await response.blob();
-      const frameObjectUrl = URL.createObjectURL(blob);
+    const frameImg = new Image();
 
-      const croppedCanvas = cropper.getCroppedCanvas({
-        width: 1080,
-        height: 1080
-      });
+    frameImg.onload = function() {
+      canvas.width = frameImg.width || 1080;
+      canvas.height = frameImg.height || 1080;
 
-      const frameImg = new Image();
-      frameImg.onload = function() {
-        canvas.width = frameImg.width || 1080;
-        canvas.height = frameImg.height || 1080;
+      // 1. Draw Cropped User Photo
+      ctx.drawImage(croppedCanvas, 0, 0, canvas.width, canvas.height);
 
-        // 2. Draw User Photo
-        ctx.drawImage(croppedCanvas, 0, 0, canvas.width, canvas.height);
+      // 2. Overlay Local Frame
+      ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
 
-        // 3. Draw External Frame Overlay
-        ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
+      // 3. Render Name & Pharmacy Name Text
+      ctx.fillStyle = "#ffffff";
+      ctx.textAlign = "center";
 
-        // 4. Render Text Overlay
-        ctx.fillStyle = "#ffffff";
-        ctx.textAlign = "center";
+      ctx.font = "bold 42px 'Segoe UI', sans-serif";
+      ctx.fillText(name.toUpperCase(), canvas.width / 2, canvas.height - 110);
 
-        ctx.font = "bold 42px 'Segoe UI', sans-serif";
-        ctx.fillText(name.toUpperCase(), canvas.width / 2, canvas.height - 110);
+      ctx.font = "normal 32px 'Segoe UI', sans-serif";
+      ctx.fillText(pharmacy, canvas.width / 2, canvas.height - 60);
 
-        ctx.font = "normal 32px 'Segoe UI', sans-serif";
-        ctx.fillText(pharmacy, canvas.width / 2, canvas.height - 60);
+      // 4. Display Canvas & Enable Download Button
+      canvas.style.display = "block";
+      downloadBtn.href = canvas.toDataURL('image/png');
+      downloadBtn.style.display = "block";
 
-        // 5. Display Canvas & Enable Download
-        canvas.style.display = "block";
-        downloadBtn.href = canvas.toDataURL('image/png');
-        downloadBtn.style.display = "block";
-
-        generateBtn.innerText = "Generate Poster";
-        generateBtn.disabled = false;
-        
-        URL.revokeObjectURL(frameObjectUrl);
-      };
-
-      frameImg.src = frameObjectUrl;
-
-    } catch (error) {
-      alert("Unable to fetch frame from the link. Please check your internet connection.");
-      console.error(error);
       generateBtn.innerText = "Generate Poster";
       generateBtn.disabled = false;
-    }
+    };
+
+    frameImg.onerror = function() {
+      alert("Error: Could not find 'pharmacist-day.png'. Make sure 'pharmacist-day.png' is placed in the exact same GitHub folder as index.html.");
+      generateBtn.innerText = "Generate Poster";
+      generateBtn.disabled = false;
+    };
+
+    frameImg.src = frameUrl;
   }
 </script>
 
