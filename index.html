@@ -4,15 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>World Pharmacist Day Poster Generator</title>
+  <!-- Cropper.js CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
   <style>
     * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: #f4f7f6; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-    .container { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; text-align: center; }
+    .container { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 550px; text-align: center; }
     h1 { color: #00796b; margin-bottom: 8px; font-size: 24px; }
     p { color: #555; font-size: 14px; margin-bottom: 20px; }
     .form-group { margin-bottom: 15px; text-align: left; }
     label { display: block; font-weight: 600; margin-bottom: 5px; color: #333; font-size: 14px; }
     input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
+    
+    /* Cropper Container Styling */
+    .crop-container { display: none; margin-top: 15px; background: #333; border-radius: 8px; overflow: hidden; max-height: 400px; }
+    .crop-container img { max-width: 100%; display: block; }
+    
     canvas { width: 100%; max-width: 400px; height: auto; border-radius: 8px; margin-top: 15px; display: none; border: 1px solid #ddd; }
     button { width: 100%; padding: 12px; background-color: #00796b; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: background 0.3s; }
     button:hover { background-color: #004d40; }
@@ -38,7 +45,12 @@
 
   <div class="form-group">
     <label for="photoUpload">Upload Your Photo</label>
-    <input type="file" id="photoUpload" accept="image/*">
+    <input type="file" id="photoUpload" accept="image/*" onchange="initCropper(event)">
+  </div>
+
+  <!-- Interactive Cropper Workspace -->
+  <div class="crop-container" id="cropContainer">
+    <img id="cropImage" src="" alt="Adjust photo">
   </div>
 
   <button id="generateBtn" onclick="generatePoster()">Generate Poster</button>
@@ -47,80 +59,109 @@
   <a id="downloadBtn" download="pharmacist_day_poster.png">Download Poster</a>
 </div>
 
+<!-- Cropper.js JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script>
-  // Frame URL routed via CORS proxy to allow canvas downloading
+  let cropper = null;
   const frameUrl = "https://images1-focus-opensocial.googleusercontent.com/gadgets/proxy?container=focus&refresh=2592000&url=" + encodeURIComponent("https://i.ibb.co/jvT93y9b/Celebrating-the-Essential-Guardians-of-Health-1.png");
+
+  // Initialize Cropper on Image Selection
+  function initCropper(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const cropImage = document.getElementById('cropImage');
+    const cropContainer = document.getElementById('cropContainer');
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      cropImage.src = e.target.result;
+      cropContainer.style.display = 'block';
+
+      // Destroy existing instance if user uploads a new image
+      if (cropper) {
+        cropper.destroy();
+      }
+
+      // Initialize Cropper with touch/zoom/pan controls
+      cropper = new Cropper(cropImage, {
+        aspectRatio: 1, // 1:1 Square Ratio matching the frame canvas
+        viewMode: 1,
+        dragMode: 'move',
+        autoCropArea: 1,
+        restore: false,
+        guides: true,
+        center: true,
+        highlight: false,
+        cropBoxMovable: true,
+        cropBoxResizable: true,
+        toggleDragModeOnDblclick: false,
+      });
+    };
+    reader.readAsDataURL(file);
+  }
 
   function generatePoster() {
     const name = document.getElementById('userName').value.trim();
     const pharmacy = document.getElementById('pharmacyName').value.trim();
-    const fileInput = document.getElementById('photoUpload');
     const canvas = document.getElementById('posterCanvas');
     const ctx = canvas.getContext('2d');
     const downloadBtn = document.getElementById('downloadBtn');
     const generateBtn = document.getElementById('generateBtn');
 
-    if (!name || !pharmacy || !fileInput.files[0]) {
-      alert('Please fill in all fields and upload a picture.');
+    if (!name || !pharmacy || !cropper) {
+      alert('Please fill in all fields, upload, and position your photo.');
       return;
     }
 
     generateBtn.innerText = "Generating...";
     generateBtn.disabled = true;
 
-    const userImgReader = new FileReader();
-    userImgReader.onload = function(e) {
-      const userImg = new Image();
-      userImg.onload = function() {
-        const frameImg = new Image();
-        frameImg.crossOrigin = "anonymous";
-        
-        frameImg.onload = function() {
-          // Canvas match frame size or default to 1080x1080
-          canvas.width = frameImg.width || 1080;
-          canvas.height = frameImg.height || 1080;
+    // Get cropped photo canvas from Cropper.js
+    const croppedCanvas = cropper.getCroppedCanvas({
+      width: 1080,
+      height: 1080
+    });
 
-          // 1. Draw User Photo (scaled & centered to fill background)
-          const scale = Math.max(canvas.width / userImg.width, canvas.height / userImg.height);
-          const x = (canvas.width / 2) - (userImg.width / 2) * scale;
-          const y = (canvas.height / 2) - (userImg.height / 2) * scale;
-          ctx.drawImage(userImg, x, y, userImg.width * scale, userImg.height * scale);
+    const frameImg = new Image();
+    frameImg.crossOrigin = "anonymous";
 
-          // 2. Draw Frame Overlay
-          ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
+    frameImg.onload = function() {
+      canvas.width = frameImg.width || 1080;
+      canvas.height = frameImg.height || 1080;
 
-          // 3. Draw Name & Pharmacy Text
-          ctx.fillStyle = "#ffffff";
-          ctx.textAlign = "center";
+      // 1. Draw Cropped/Zoomed User Photo onto main canvas
+      ctx.drawImage(croppedCanvas, 0, 0, canvas.width, canvas.height);
 
-          // Adjust position coordinates if needed based on frame layout
-          ctx.font = "bold 42px 'Segoe UI', sans-serif";
-          ctx.fillText(name.toUpperCase(), canvas.width / 2, canvas.height - 110);
+      // 2. Overlay the PNG Frame
+      ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
 
-          ctx.font = "normal 32px 'Segoe UI', sans-serif";
-          ctx.fillText(pharmacy, canvas.width / 2, canvas.height - 60);
+      // 3. Draw Pharmacist Name & Pharmacy Name
+      ctx.fillStyle = "#ffffff";
+      ctx.textAlign = "center";
 
-          // Show Output
-          canvas.style.display = "block";
-          downloadBtn.href = canvas.toDataURL('image/png');
-          downloadBtn.style.display = "block";
+      ctx.font = "bold 42px 'Segoe UI', sans-serif";
+      ctx.fillText(name.toUpperCase(), canvas.width / 2, canvas.height - 110);
 
-          generateBtn.innerText = "Generate Poster";
-          generateBtn.disabled = false;
-        };
+      ctx.font = "normal 32px 'Segoe UI', sans-serif";
+      ctx.fillText(pharmacy, canvas.width / 2, canvas.height - 60);
 
-        frameImg.onerror = function() {
-          alert("Failed to load frame overlay. Please ensure the frame image URL is publicly accessible.");
-          generateBtn.innerText = "Generate Poster";
-          generateBtn.disabled = false;
-        };
+      // Display Final Canvas and Show Download Link
+      canvas.style.display = "block";
+      downloadBtn.href = canvas.toDataURL('image/png');
+      downloadBtn.style.display = "block";
 
-        frameImg.src = frameUrl;
-      };
-      userImg.src = e.target.result;
+      generateBtn.innerText = "Generate Poster";
+      generateBtn.disabled = false;
     };
 
-    userImgReader.readAsDataURL(fileInput.files[0]);
+    frameImg.onerror = function() {
+      alert("Failed to load frame overlay. Please ensure the link is publicly reachable.");
+      generateBtn.innerText = "Generate Poster";
+      generateBtn.disabled = false;
+    };
+
+    frameImg.src = frameUrl;
   }
 </script>
 
