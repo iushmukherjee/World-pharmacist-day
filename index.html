@@ -3,187 +3,348 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>World Pharmacist Day Poster Generator</title>
+  <title>World Pharmacist Day Poster Generator | Alteus</title>
+  
   <!-- Cropper.js CSS -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css"/>
+  
   <style>
-    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: #f4f7f6; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-    .container { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 550px; text-align: center; }
-    h1 { color: #00796b; margin-bottom: 8px; font-size: 24px; }
-    p { color: #555; font-size: 14px; margin-bottom: 20px; }
-    .form-group { margin-bottom: 15px; text-align: left; }
-    label { display: block; font-weight: 600; margin-bottom: 5px; color: #333; font-size: 14px; }
-    input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
-    .crop-container { display: none; margin-top: 15px; background: #333; border-radius: 8px; overflow: hidden; max-height: 400px; }
-    .crop-container img { max-width: 100%; display: block; }
-    canvas { width: 100%; max-width: 400px; height: auto; border-radius: 8px; margin-top: 15px; display: none; border: 1px solid #ddd; }
-    button { width: 100%; padding: 12px; background-color: #00796b; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: background 0.3s; }
-    button:hover { background-color: #004d40; }
-    button:disabled { background-color: #b0bec5; cursor: not-allowed; }
-    #downloadBtn { display: none; background-color: #2e7d32; text-decoration: none; text-align: center; margin-top: 10px; padding: 12px; color: white; border-radius: 6px; font-weight: bold; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #0f172a;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      color: #38bdf8;
+      text-align: center;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    @media (min-width: 768px) {
+      .container {
+        flex-direction: row;
+      }
+    }
+
+    .form-section {
+      flex: 1;
+      background-color: #1e293b;
+      padding: 20px;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    label {
+      font-size: 0.9rem;
+      color: #cbd5e1;
+      font-weight: 600;
+    }
+
+    input[type="text"], input[type="file"] {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #334155;
+      background-color: #0f172a;
+      color: #ffffff;
+      outline: none;
+    }
+
+    input[type="text"]:focus {
+      border-color: #38bdf8;
+    }
+
+    .crop-container {
+      max-height: 300px;
+      background-color: #000;
+      overflow: hidden;
+      display: none;
+      border-radius: 6px;
+    }
+
+    .crop-container img {
+      max-width: 100%;
+    }
+
+    .preview-section {
+      flex: 1;
+      background-color: #1e293b;
+      padding: 20px;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    canvas {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+    }
+
+    button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .btn-primary {
+      background-color: #0284c7;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: #0369a1;
+    }
+
+    .btn-whatsapp {
+      background-color: #25d366;
+      color: white;
+    }
+
+    .btn-whatsapp:hover {
+      background-color: #1da851;
+    }
+
+    button:disabled {
+      background-color: #475569;
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <h1>World Pharmacist Day Poster</h1>
-  <p>Create and download your personalized frame</p>
+  <h1>World Pharmacist Day - Frame Generator</h1>
 
-  <div class="form-group">
-    <label for="userName">Pharmacist Name</label>
-    <input type="text" id="userName" placeholder="e.g., Jane Doe, RPh">
+  <div class="container">
+    <!-- INPUT FORM -->
+    <div class="form-section">
+      <div>
+        <label for="pharmacistName">Pharmacist Name</label>
+        <input type="text" id="pharmacistName" placeholder="e.g. Rahul Sharma" value="Rahul Sharma">
+      </div>
+
+      <div>
+        <label for="pharmacyName">Pharmacy Name</label>
+        <input type="text" id="pharmacyName" placeholder="e.g. City Medical Store" value="City Medical Store">
+      </div>
+
+      <div>
+        <label for="imageUpload">Upload Pharmacist Photo</label>
+        <input type="file" id="imageUpload" accept="image/*">
+      </div>
+
+      <!-- Crop & Adjustment Container -->
+      <div class="crop-container" id="cropWrapper">
+        <img id="imageToCrop" src="" alt="To Crop">
+      </div>
+
+      <button type="button" class="btn-primary" id="applyCropBtn" style="display: none;">Apply & Crop Photo</button>
+    </div>
+
+    <!-- CANVAS PREVIEW & DOWNLOAD -->
+    <div class="preview-section">
+      <canvas id="posterCanvas" width="750" height="1050"></canvas>
+      
+      <div class="btn-group">
+        <button class="btn-primary" id="downloadBtn">Download Poster</button>
+        <button class="btn-whatsapp" id="shareWhatsappBtn">Share to WhatsApp</button>
+      </div>
+    </div>
   </div>
 
-  <div class="form-group">
-    <label for="pharmacyName">Pharmacy Name</label>
-    <input type="text" id="pharmacyName" placeholder="e.g., City Care Pharmacy">
-  </div>
+  <!-- Cropper.js Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
-  <div class="form-group">
-    <label for="photoUpload">Upload Your Photo</label>
-    <input type="file" id="photoUpload" accept="image/*" onchange="initCropper(event)">
-  </div>
-
-  <div class="crop-container" id="cropContainer">
-    <img id="cropImage" src="" alt="Adjust photo">
-  </div>
-
-  <button id="generateBtn" onclick="generatePoster()">Generate Poster</button>
-
-  <canvas id="posterCanvas" width="1080" height="1080"></canvas>
-  <a id="downloadBtn" download="pharmacist_day_poster.png">Download Poster</a>
-</div>
-
-<!-- Cropper.js JavaScript -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-<script>
-  let cropper = null;
-  let uploadedImg = null;
-  const frameUrl = "./pharmacist-day.png";
-
-  function initCropper(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const cropImage = document.getElementById('cropImage');
-    const cropContainer = document.getElementById('cropContainer');
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      uploadedImg = new Image();
-      uploadedImg.src = e.target.result;
-
-      cropImage.src = e.target.result;
-      cropContainer.style.display = 'block';
-
-      if (cropper) {
-        cropper.destroy();
-      }
-
-      try {
-        cropper = new Cropper(cropImage, {
-          aspectRatio: 1,
-          viewMode: 1,
-          dragMode: 'move',
-          autoCropArea: 1,
-          restore: false,
-          guides: true,
-          center: true,
-          highlight: false,
-          cropBoxMovable: true,
-          cropBoxResizable: true,
-          toggleDragModeOnDblclick: false,
-        });
-      } catch (err) {
-        console.warn("Cropper fallback:", err);
-      }
-    };
-    reader.readAsDataURL(file);
-  }
-
-  function generatePoster() {
-    const name = document.getElementById('userName').value.trim();
-    const pharmacy = document.getElementById('pharmacyName').value.trim();
+  <script>
     const canvas = document.getElementById('posterCanvas');
     const ctx = canvas.getContext('2d');
+    const imageUpload = document.getElementById('imageUpload');
+    const imageToCrop = document.getElementById('imageToCrop');
+    const cropWrapper = document.getElementById('cropWrapper');
+    const applyCropBtn = document.getElementById('applyCropBtn');
+    const pharmacistNameInput = document.getElementById('pharmacistName');
+    const pharmacyNameInput = document.getElementById('pharmacyName');
     const downloadBtn = document.getElementById('downloadBtn');
-    const generateBtn = document.getElementById('generateBtn');
+    const shareWhatsappBtn = document.getElementById('shareWhatsappBtn');
 
-    if (!name || !pharmacy || (!cropper && !uploadedImg)) {
-      alert('Please fill in all fields and upload a photo.');
-      return;
-    }
+    let cropper = null;
+    let croppedImageObj = null;
 
-    generateBtn.innerText = "Generating...";
-    generateBtn.disabled = true;
+    // Load background frame template
+    const frameImage = new Image();
+    frameImage.src = 'frame.png'; // Make sure frame.png is in the same folder
+    frameImage.onload = () => {
+      renderCanvas();
+    };
 
-    let userSource = null;
-    if (cropper) {
-      userSource = cropper.getCroppedCanvas({ width: 600, height: 600 });
-    } else {
-      userSource = uploadedImg;
-    }
+    // Circular frame parameters matching the original frame.png image dimensions
+    // Canvas dimensions: 750 x 1050
+    const CIRCLE_CENTER_X = 375;
+    const CIRCLE_CENTER_Y = 512;
+    const CIRCLE_RADIUS = 222;
 
-    const frameImg = new Image();
+    // Trigger canvas render on text changes
+    pharmacistNameInput.addEventListener('input', renderCanvas);
+    pharmacyNameInput.addEventListener('input', renderCanvas);
 
-    frameImg.onload = function() {
-      canvas.width = frameImg.width || 1080;
-      canvas.height = frameImg.height || 1080;
+    // Handle Image Upload
+    imageUpload.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          imageToCrop.src = e.target.result;
+          cropWrapper.style.display = 'block';
+          applyCropBtn.style.display = 'block';
 
+          if (cropper) {
+            cropper.destroy();
+          }
+
+          // Initialize Cropper with 1:1 Aspect Ratio for the circle frame
+          cropper = new Cropper(imageToCrop, {
+            aspectRatio: 1,
+            viewMode: 1,
+            autoCropArea: 0.8,
+          });
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Apply Crop
+    applyCropBtn.addEventListener('click', () => {
+      if (!cropper) return;
+      
+      const croppedCanvas = cropper.getCroppedCanvas({
+        width: CIRCLE_RADIUS * 2,
+        height: CIRCLE_RADIUS * 2
+      });
+
+      croppedImageObj = new Image();
+      croppedImageObj.src = croppedCanvas.toDataURL('image/png');
+      croppedImageObj.onload = () => {
+        renderCanvas();
+      };
+    });
+
+    // Main Canvas Render Function
+    function renderCanvas() {
+      // 1. Clear Canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // STEP 1: Draw Frame First (Background)
-      ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
+      // 2. Draw Cropped Pharmacist Image clipped inside the circle
+      if (croppedImageObj) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(CIRCLE_CENTER_X, CIRCLE_CENTER_Y, CIRCLE_RADIUS, 0, Math.PI * 2, true);
+        ctx.closePath();
+        ctx.clip();
 
-      // STEP 2: Draw Circular Photo ON TOP of the frame
-      const photoSize = 520; // Width/Height of user photo
-      const photoX = (canvas.width - photoSize) / 2; // Center horizontally
-      const photoY = 220; // Vertical position on poster
+        ctx.drawImage(
+          croppedImageObj, 
+          CIRCLE_CENTER_X - CIRCLE_RADIUS, 
+          CIRCLE_CENTER_Y - CIRCLE_RADIUS, 
+          CIRCLE_RADIUS * 2, 
+          CIRCLE_RADIUS * 2
+        );
+        ctx.restore();
+      }
 
-      ctx.save();
-      ctx.beginPath();
-      // Draw circular clipping path
-      ctx.arc(canvas.width / 2, photoY + photoSize / 2, photoSize / 2, 0, Math.PI * 2);
-      ctx.clip();
-      ctx.drawImage(userSource, photoX, photoY, photoSize, photoSize);
-      ctx.restore();
+      // 3. Draw Poster Overlay (frame.png) over the photo
+      if (frameImage.complete) {
+        ctx.drawImage(frameImage, 0, 0, canvas.width, canvas.height);
+      }
 
-      // Border ring around the circular photo
-      ctx.strokeStyle = "#ffffff";
-      ctx.lineWidth = 10;
-      ctx.beginPath();
-      ctx.arc(canvas.width / 2, photoY + photoSize / 2, photoSize / 2, 0, Math.PI * 2);
-      ctx.stroke();
+      // 4. Render Pharmacist Name and Pharmacy Name below the Alteus logo
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#FFFFFF';
 
-      // STEP 3: Draw Text Overlay
-      ctx.fillStyle = "#ffffff";
-      ctx.textAlign = "center";
+      // Pharmacist Name
+      const pName = pharmacistNameInput.value.trim();
+      ctx.font = 'bold 26px sans-serif';
+      ctx.fillText(pName ? pName : '', CIRCLE_CENTER_X, 1000);
 
-      ctx.font = "bold 42px 'Segoe UI', sans-serif";
-      ctx.fillText(name.toUpperCase(), canvas.width / 2, canvas.height - 110);
+      // Pharmacy Name
+      const phName = pharmacyNameInput.value.trim();
+      ctx.font = '20px sans-serif';
+      ctx.fillText(phName ? phName : '', CIRCLE_CENTER_X, 1030);
+    }
 
-      ctx.font = "normal 32px 'Segoe UI', sans-serif";
-      ctx.fillText(pharmacy, canvas.width / 2, canvas.height - 60);
+    // Download functionality
+    downloadBtn.addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.download = `Pharmacist_Day_${pharmacistNameInput.value || 'Poster'}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
 
-      // Show canvas and enable download
-      canvas.style.display = "block";
-      downloadBtn.href = canvas.toDataURL('image/png');
-      downloadBtn.style.display = "block";
+    // WhatsApp Sharing functionality
+    shareWhatsappBtn.addEventListener('click', async () => {
+      canvas.toBlob(async (blob) => {
+        const file = new File([blob], 'pharmacist_day.png', { type: 'image/png' });
 
-      generateBtn.innerText = "Generate Poster";
-      generateBtn.disabled = false;
-    };
+        // Native Mobile Share API (Direct file sharing to WhatsApp)
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              files: [file],
+              title: 'Happy World Pharmacist Day',
+              text: 'Celebrating World Pharmacist Day!',
+            });
+          } catch (error) {
+            console.log('Error sharing:', error);
+          }
+        } else {
+          // Fallback for desktop/unsupported browsers: trigger direct download and open WhatsApp Web
+          const downloadLink = document.createElement('a');
+          downloadLink.download = 'pharmacist_day.png';
+          downloadLink.href = canvas.toDataURL('image/png');
+          downloadLink.click();
 
-    frameImg.onerror = function() {
-      alert("Error: 'pharmacist-day.png' was not found in repository.");
-      generateBtn.innerText = "Generate Poster";
-      generateBtn.disabled = false;
-    };
-
-    frameImg.src = frameUrl;
-  }
-</script>
-
+          const text = encodeURIComponent("Happy World Pharmacist Day! Check out my personalized poster.");
+          window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+        }
+      });
+    });
+  </script>
 </body>
 </html>
