@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Frame | Alteus</title>
+  
+  <!-- Canvas Confetti Library for Surprise Effect -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    
+    body {
+      background-color: #0f172a;
+      color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .reveal-card {
+      background-color: #1e293b;
+      padding: 25px;
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      max-width: 500px;
+      width: 100%;
+    }
+
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.7); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    h1 { font-size: 1.6rem; color: #38bdf8; text-align: center; }
+
+    canvas {
+      width: 100%;
+      height: auto;
+      max-height: 70vh;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .btn-group { display: flex; gap: 12px; width: 100%; }
+
+    button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: transform 0.2s ease, opacity 0.2s;
+    }
+    button:hover { opacity: 0.9; transform: translateY(-2px); }
+
+    .btn-primary { background-color: #0284c7; color: white; }
+    .btn-whatsapp { background-color: #25d366; color: white; }
+    .btn-back { background-color: transparent; border: 1px solid #475569; color: #cbd5e1; width: 100%; }
+  </style>
+</head>
+<body>
+
+  <div class="reveal-card">
+    <h1>🎉 Happy World Pharmacist Day!</h1>
+    
+    <canvas id="posterCanvas" width="750" height="1050"></canvas>
+
+    <div class="btn-group">
+      <button class="btn-primary" id="downloadBtn">Download Frame</button>
+      <button class="btn-whatsapp" id="shareWhatsappBtn">Share to WhatsApp</button>
+    </div>
+    <button class="btn-back" onclick="window.location.href='index.html'">Create Another Frame</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('posterCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Retrieve data passed from index.html
+    const pharmacistName = sessionStorage.getItem('pharmacistName');
+    const pharmacyName = sessionStorage.getItem('pharmacyName');
+    const croppedImageSrc = sessionStorage.getItem('croppedImage');
+
+    // Redirect back to main page if user accesses result page directly without submitting
+    if (!pharmacistName || !croppedImageSrc) {
+      window.location.href = 'index.html';
+    }
+
+    // Circular frame parameters matching frame.png dimensions
+    const CIRCLE_CENTER_X = 375;
+    const CIRCLE_CENTER_Y = 512;
+    const CIRCLE_RADIUS = 222;
+
+    const frameImage = new Image();
+    frameImage.src = 'frame.png';
+
+    const userPhoto = new Image();
+    userPhoto.src = croppedImageSrc;
+
+    let loadedCount = 0;
+    const checkLoaded = () => {
+      loadedCount++;
+      if (loadedCount === 2) {
+        renderCanvas();
+        triggerSurpriseConfetti();
+      }
+    };
+
+    frameImage.onload = checkLoaded;
+    userPhoto.onload = checkLoaded;
+
+    function renderCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 1. Draw Cropped Photo inside Circle Mask
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(CIRCLE_CENTER_X, CIRCLE_CENTER_Y, CIRCLE_RADIUS, 0, Math.PI * 2, true);
+      ctx.closePath();
+      ctx.clip();
+      ctx.drawImage(
+        userPhoto,
+        CIRCLE_CENTER_X - CIRCLE_RADIUS,
+        CIRCLE_CENTER_Y - CIRCLE_RADIUS,
+        CIRCLE_RADIUS * 2,
+        CIRCLE_RADIUS * 2
+      );
+      ctx.restore();
+
+      // 2. Overlay Frame Template
+      ctx.drawImage(frameImage, 0, 0, canvas.width, canvas.height);
+
+      // 3. Render White Text below Alteus logo
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#FFFFFF';
+
+      // Pharmacist Name
+      ctx.font = 'bold 26px sans-serif';
+      ctx.fillText(pharmacistName, CIRCLE_CENTER_X, 1000);
+
+      // Pharmacy Name
+      ctx.font = '20px sans-serif';
+      ctx.fillText(pharmacyName, CIRCLE_CENTER_X, 1030);
+    }
+
+    // Trigger surprise confetti burst
+    function triggerSurpriseConfetti() {
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+    }
+
+    // Download Button handler
+    document.getElementById('downloadBtn').addEventListener('click', () => {
+      const link = document.createElement('a');
+      link.download = `Pharmacist_Day_${pharmacistName.replace(/\s+/g, '_')}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+
+    // Share to WhatsApp Handler
+    document.getElementById('shareWhatsappBtn').addEventListener('click', () => {
+      canvas.toBlob(async (blob) => {
+        const file = new File([blob], 'pharmacist_day.png', { type: 'image/png' });
+
+        // Native mobile share API (shares image directly if supported)
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              files: [file],
+              title: 'Happy World Pharmacist Day',
+              text: 'Celebrating World Pharmacist Day!',
+            });
+          } catch (err) {
+            console.log('Share canceled', err);
+          }
+        } else {
+          // Desktop fallback: download image & open WhatsApp web
+          const downloadLink = document.createElement('a');
+          downloadLink.download = 'pharmacist_day.png';
+          downloadLink.href = canvas.toDataURL('image/png');
+          downloadLink.click();
+
+          const text = encodeURIComponent("Happy World Pharmacist Day! Check out my personalized poster.");
+          window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
+
