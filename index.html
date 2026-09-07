@@ -114,16 +114,13 @@
         return;
       }
 
-      // Crop image to 450x450
       const croppedCanvas = cropper.getCroppedCanvas({ width: 450, height: 450 });
       const croppedImageData = croppedCanvas.toDataURL('image/png');
 
-      // Store in Session Storage to pass to result.html
       sessionStorage.setItem('pharmacistName', pName);
       sessionStorage.setItem('pharmacyName', phName);
       sessionStorage.setItem('croppedImage', croppedImageData);
 
-      // Redirect to reveal page
       window.location.href = 'result.html';
     });
   </script>
